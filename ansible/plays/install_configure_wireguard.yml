@@ -1,0 +1,70 @@
+- hosts: ['hgw0', 'hgw1', 'gw0', 'gw1', 'gw2', 'gw3', 'gw4', 'gw5']
+  tasks:
+    - name: update cache
+      apt:
+        update_cache: yes
+      become: yes
+
+    # https://github.com/githubixx/ansible-role-wireguard/blob/master/tasks/setup-ubuntu.yml#L23C1-L27C18
+    - name: (Ubuntu) Ensure WireGuard DKMS package is removed
+      ansible.builtin.apt:
+        name:
+          - "wireguard-dkms"
+        state: absent
+
+    - name: install wireguard, QR encoder, wget, curl, tcpdump
+      apt:
+        update_cache: yes
+        pkg:
+         - wireguard
+         - qrencode
+         - wget
+         - curl
+         - tcpdump
+      become: yes
+
+    # https://www.wireguard.com/quickstart/
+    - name: create a wireguard pub, private key
+      shell: wg genkey | tee privatekey | wg pubkey > publickey
+      args:
+        chdir: /home/rvn
+
+    - name: get wg private key
+      shell: cat privatekey
+      args:
+        chdir: /home/rvn
+	  register: wg-priv
+
+    - name: set wg private key variable
+      set_fact:
+        config: "{{ inventory_hostname|combine({'wireguard': {'private_key': wg-priv.stdout}}, recursive=True) }}"
+
+    - name: get wg public key
+      shell: cat publickey
+      args:
+        chdir: /home/rvn
+	  register: wg-pub
+
+    - name: set wg public key variable
+      set_fact:
+        config: "{{ inventory_hostname|combine({'wireguard': {'public_key': wg-pub.stdout}}, recursive=True) }}"
+
+- hosts: ['hgw0', 'hgw1']
+  tasks:
+    - name: copy over our template files
+      template: 
+        src: wireguard-server.conf
+        dest: /home/rvn/wireguard.conf
+      when: h in inventory_hostname
+
+    - name: copy over our template files
+      template:
+        src: wireguard-client.conf
+        dest: /home/rvn/wireguard.conf
+      when: h not in inventory_hostname
+
+	- name: start wireguard (emphemeral)
+	  shell: wg-quick up wireguard.conf
+      args:
+        chdir: /home/rvn
+      become: yes

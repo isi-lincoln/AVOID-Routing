@@ -1,0 +1,79 @@
+config:
+  'hgw0':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 10.10.0.10/24
+    interfaces:
+    - ip: 10.0.0.100
+      name: eth1
+      network: overlay
+  'hgw1':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 10.11.0.11/24
+    interfaces:
+    - ip: 10.0.0.101
+      name: eth1
+      network: overlay
+  'gw0':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 10.10.0.20/24
+      home: hwg0
+    interfaces:
+    - ip: 10.0.0.10
+      name: eth1
+      network: overlay
+  'gw1':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 10.10.0.21/24
+      home: hwg0
+    interfaces:
+    - ip: 10.0.0.11
+      name: eth1
+      network: overlay
+  'gw2':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 10.10.0.22/24
+      home: hwg0
+    interfaces:
+    - ip: 10.0.0.12
+      name: eth1
+      network: overlay
+  'gw3':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 10.11.0.23/24
+      home: hwg1
+    interfaces:
+    - ip: 10.0.0.13
+      name: eth1
+      network: overlay
+  'gw4':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 10.11.0.24/24
+      home: hwg1
+    interfaces:
+    - ip: 10.0.0.14
+      name: eth1
+      network: overlay
+  'gw5':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 10.11.0.25/24
+      home: hwg1
+    interfaces:
+    - ip: 10.0.0.15
+      name: eth1
+      network: overlay
