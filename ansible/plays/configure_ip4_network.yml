@@ -11,22 +11,16 @@
         ifaces: "{{ num_eths.stdout_lines }}"
 
     - name: flush interface
-      command: ip addr flush {{ item.name }}
-      with_items:
-        - "{{ vars['config'][inventory_hostname].interfaces }}"
+      command: ip addr flush {{ config[inventory_hostname].interface.name }}
       become: yes
       when: inventory_hostname in vars['config']
 
     - name: set addr interface
-      command: ip addr add {{ item.ip }}/24 dev {{ item.name }}
-      with_items:
-        - "{{ vars['config'][inventory_hostname].interfaces }}"
+      command: ip addr add {{ config[inventory_hostname].interface.address }}/24 dev {{ config[inventory_hostname].interface.name }}
       become: yes
       when: inventory_hostname in vars['config']
 
     - name: set link up
-      command: ip link set up {{ item.name }}
-      with_items:
-        - "{{ vars['config'][inventory_hostname].interfaces }}"
+      command: ip link set up {{ config[inventory_hostname].interface.name }}
       become: yes
       when: inventory_hostname in vars['config']
