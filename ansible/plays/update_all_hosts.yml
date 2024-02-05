@@ -1,4 +1,4 @@
-- hosts: ['hgw0', 'hgw1', 'gw0', 'gw1', 'gw2', 'gw3', 'gw4', 'gw5']
+- hosts: all
   tasks:
     - name: disable apparmor
       command: systemctl disable apparmor

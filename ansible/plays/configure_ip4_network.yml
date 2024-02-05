@@ -1,3 +1,15 @@
+- hosts: [isps, gateways]
+  tasks:
+    - name: copy over sys config file for forwarding from frr
+      copy:
+        src: ../files/sysctl.conf
+        dest: /etc/sysctl.d/99frr_defaults.conf
+      become: yes
+
+    - name: set all sysctl values
+      command: sysctl -p /etc/sysctl.d/99frr_defaults.conf
+      become: yes
+
 - hosts: all
   tasks:
     - name: get all addresses
@@ -10,17 +22,31 @@
     - set_fact:
         ifaces: "{{ num_eths.stdout_lines }}"
 
-    - name: flush interface
-      command: ip addr flush {{ config[inventory_hostname].interface.name }}
+    - name: flush interface before adding static routes
+      command: ip addr flush {{ item }}
+      with_items:
+        - "{{ vars['config'][inventory_hostname].interfaces | list }}"
+      ignore_errors: yes
       become: yes
       when: inventory_hostname in vars['config']
 
-    - name: set addr interface
-      command: ip addr add {{ config[inventory_hostname].interface.address }}/24 dev {{ config[inventory_hostname].interface.name }}
+    - name: addr interface
+      command: ip addr add {{ vars['config'][inventory_hostname].interfaces[item]["address"] }}/{{ vars['config'][inventory_hostname].interfaces[item]["netmask"] }} dev {{ item }}
+      with_items:
+        - "{{ vars['config'][inventory_hostname].interfaces | list }}"
       become: yes
       when: inventory_hostname in vars['config']
 
-    - name: set link up
-      command: ip link set up {{ config[inventory_hostname].interface.name }}
+    - name: up interface
+      command: ip link set dev {{ item }} up
+      with_items:
+        - "{{ vars['config'][inventory_hostname].interfaces | list }}"
       become: yes
       when: inventory_hostname in vars['config']
+
+    - name: add routes
+      command: ip route add {{ vars['config'][inventory_hostname].routes[item][0] }} dev {{ item }}
+      with_items:
+        - "{{ vars['config'][inventory_hostname].routes | list }}"
+      become: yes
+      when: inventory_hostname in vars['config'] and "routes" in vars['config'][inventory_hostname]

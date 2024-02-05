@@ -25,3 +25,8 @@ This will create a topology with 2 home gateways, 6 nodes, and gw0-2 hosts conne
 ## TODO
 
 A way to do this without server needing peer certificates.
+
+
+## Reading
+
+[Wireguard AllowedIPs](https://try.popho.be/wg.html)

@@ -1,88 +1,139 @@
 iface_name: wg0
 config:
-  'hgw0':
+  'ue':
+    interfaces:
+      eth1:
+        address: 10.0.0.100
+        network: isp0
+        netmask: 24
+      eth2:
+        address: 10.0.1.100
+        network: isp1
+        netmask: 24
+      eth3:
+        address: 10.0.2.100
+        network: isp2
+        netmask: 24
+    routes:
+      eth1:
+        - 10.0.0.0/8
+
+  'isp0':
+    interfaces:
+      eth1:
+        address: 10.0.0.1
+        network: ue
+        netmask: 24
+      eth2:
+        address: 10.1.0.1
+        network: avoid-gw0
+        netmask: 24
+    routes:
+      eth2:
+        - 10.1.1.0/24
+        
+  'isp1':
+    interfaces:
+      eth1:
+        address: 10.0.1.1
+        network: ue
+        netmask: 24
+      eth2:
+        address: 10.2.0.1
+        network: avoid-gw1
+        netmask: 24
+    routes:
+      eth2:
+        - 10.2.1.0/24
+
+  'isp2':
+    interfaces:
+      eth1:
+        address: 10.0.2.1
+        network: ue
+        netmask: 24
+      eth2:
+        address: 10.3.0.1
+        network: avoid-gw2
+        netmask: 24
+    routes:
+      eth2:
+        - 10.3.1.0/24
+
+  'avoid-gw0':
     wireguard:
       internet: eth1
       port: 51000
       address: 10.10.0.10
       netmask: 24
-    interface:
-      address: 10.0.0.100
-      name: eth1
-      network: overlay
-  'hgw1':
+    interfaces:
+      eth1:
+        address: 10.1.0.100
+        network: isp0
+        netmask: 24
+      eth2:
+        address: 10.1.1.1
+        network: app0
+        netmask: 24
+    routes:
+      eth1:
+        - 10.0.0.0/24
+
+  'avoid-gw1':
     wireguard:
       internet: eth1
       port: 51000
       address: 10.11.0.11
       netmask: 24
-    interface:
-      address: 10.0.0.101
-      name: eth1
-      network: overlay
-  'gw0':
+    interfaces:
+      eth1:
+        address: 10.2.0.100
+        network: isp1
+        netmask: 24
+      eth2:
+        address: 10.2.1.1
+        network: app1
+        netmask: 24
+    routes:
+      eth1:
+        - 10.0.1.0/24
+
+  'avoid-gw2':
     wireguard:
       internet: eth1
       port: 51000
-      address: 10.10.0.20
-      netmask: 32
-      home: hgw0
-    interface:
-      address: 10.0.0.10
-      name: eth1
-      network: overlay
-  'gw1':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 10.10.0.21
-      netmask: 32
-      home: hgw0
-    interface:
-      address: 10.0.0.11
-      name: eth1
-      network: overlay
-  'gw2':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 10.10.0.22
-      netmask: 32
-      home: hgw0
-    interface:
-      address: 10.0.0.12
-      name: eth1
-      network: overlay
-  'gw3':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 10.11.0.23
-      netmask: 32
-      home: hgw1
-    interface:
-      address: 10.0.0.13
-      name: eth1
-      network: overlay
-  'gw4':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 10.11.0.24
-      netmask: 32
-      home: hgw1
-    interface:
-      address: 10.0.0.14
-      name: eth1
-      network: overlay
-  'gw5':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 10.11.0.25
-      netmask: 32
-      home: hgw1
-    interface:
-      address: 10.0.0.15
-      name: eth1
-      network: overlay
+      address: 10.11.0.11
+      netmask: 24
+    interfaces:
+      eth1:
+        address: 10.3.0.100
+        network: isp2
+        netmask: 24
+      eth2:
+        address: 10.3.1.1
+        network: app2
+        netmask: 24
+    routes:
+      eth1:
+        - 10.0.1.0/24
+
+  'app0':
+    interfaces:
+      eth1:
+        address: 10.1.1.100
+        network: avoid-gw0
+        netmask: 8
+
+  'app1':
+    interfaces:
+      eth1:
+        address: 10.2.1.100
+        network: avoid-gw1
+        netmask: 8
+
+  'app2':
+    interfaces:
+      eth1:
+        address: 10.3.1.100
+        network: avoid-gw2
+        netmask: 8
