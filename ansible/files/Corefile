@@ -1,0 +1,52 @@
+# /etc/coredns/Corefile
+
+avoid.org:53 {
+    file /etc/coredns/avoid.zone
+    reload 2s
+
+    log
+    errors
+    health
+    ready
+}
+
+
+.:53 {
+    log
+    errors
+    health
+    ready
+
+    hosts /etc/coredns/avoid.db avoid.org {
+        10.1.0.100 gw0.avoid.org
+        10.2.0.100 gw1.avoid.org
+        10.3.0.100 gw2.avoid.org
+        ttl 10
+        no_reverse
+        fallthrough
+    }
+
+    #forward . /etc/resolv.conf
+    #cache
+}
+
+#tls://.:853 {
+#    log
+#    errors
+#    health
+#    ready
+#
+#    tls /etc/ssl/private/avoid-gw0.pem /etc/ssl/private/avoid-gw0.key
+#
+#    hosts {
+#        10.1.0.100 gw0.avoid.org
+#        10.2.0.100 gw1.avoid.org
+#        10.3.0.100 gw2.avoid.org
+#        ttl 10
+#        no_reverse
+#        fallthrough
+#    }
+#
+#    forward . /etc/resolv.conf
+#    cache
+#}

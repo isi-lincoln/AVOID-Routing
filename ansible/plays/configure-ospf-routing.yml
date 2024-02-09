@@ -1,0 +1,108 @@
+---
+- hosts: [isps]
+  become: yes
+  tasks:
+    - name: include our variables for the build
+      include_vars: vars/hosts.yml
+
+    - name: Recursively remove directory
+      file:
+        path: /etc/apt/sources.list.d/frr.list
+        state: absent
+
+    - name: install lsb-release for frr script
+      shell: apt-get --allow-releaseinfo-change update
+
+    - name: install lsb-release for frr script
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - lsb-release
+        - gnupg2
+
+    - name: copy frr deb script
+      copy:
+        src: files/add-frr.sh
+        dest: /etc/apt/add-frr.sh
+        owner: root
+        group: root
+        mode: 0755
+ 
+    # bug in current frr 7.5.1 with ospfv6, missing conf t, int eth1, ipv6 ospf6 area option (which enables ospf on the interface- big oops)   
+    - name: add frr deb
+      command: /etc/apt/add-frr.sh
+
+    - name: install packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - ntp
+        - ethtool
+        - frr
+        - tcpdump
+        - lldpd
+
+    - name: set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: stop frr
+      systemd:
+        name: frr
+        state: stopped
+
+    - name: remove address from ifaces
+      command: "ip addr flush dev {{ item.eth }}"
+      ignore_errors: yes
+      loop: "{{ setup[inventory_hostname].ips }}"
+
+    #- name: add address v6
+    #  command: "ip addr add {{ item.ipv6 }}/120 dev {{ item.eth }}"
+    #  loop: "{{ setup[inventory_hostname].ips }}"
+
+    - name: add address v4
+      command: "ip addr add {{ item.ipv4 }}/24 dev {{ item.eth }}"
+      loop: "{{ setup[inventory_hostname].ips }}"
+
+    - name: set interface up
+      command: "ip link set dev {{ item.eth }} up"
+      loop: "{{ setup[inventory_hostname].ips }}"
+
+    - name: copy over sysctl file
+      copy:
+        src: files/frr_defaults.conf
+        dest: /etc/sysctl.d/99frr_defaults.conf
+        owner: root
+        group: root
+
+    - name: make sysctl settings persist
+      command: sysctl -p /etc/sysctl.d/99frr_defaults.conf
+
+    - name: copy over daemons file
+      copy:
+        src: files/daemons
+        dest: /etc/frr/daemons
+        owner: root
+        group: root
+
+    - name: copy over template
+      template:
+        src: templates/frr.conf
+        dest: /etc/frr/frr.conf
+        owner: root
+        group: root
+
+    - name: reload frr
+      systemd:
+        name: frr
+        daemon_reload: yes
+        state: reloaded
+
+    - name: restart frr
+      systemd:
+        name: frr
+        state: restarted

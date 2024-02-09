@@ -1,0 +1,36 @@
+---
+# generate keys
+- hosts: localhost
+  tasks:
+    - import_role:
+        name: etcd
+      vars:
+        keygen: yes
+        local: yes
+        auth_hosts:
+          - db0,app0,{{ config["app0"]["wireguard"]["address"] }}
+          - db1,app1,{{ config["app1"]["wireguard"]["address"] }}
+          - db2,app2,{{ config["app2"]["wireguard"]["address"] }}
+
+# install and configure etcd
+- hosts: [apps]
+  become: true
+  vars:
+    app0: { ip: {{ config["app0"]["wireguard"]["address"] }}, alias: db0 }
+    app1: { ip: {{ config["app1"]["wireguard"]["address"] }}, alias: db1 }
+    app2: { ip: {{ config["app2"]["wireguard"]["address"] }}, alias: db2 }
+  tasks:
+    - import_role:
+        name: etcd
+      vars:
+        install: yes
+        alias: "{{vars[inventory_hostname_short].alias}}"
+        address: "{{inventory_hostname_short}}"
+        ip: "{{vars[inventory_hostname_short].ip}}"
+        hosts:
+          - alias: db0
+            endpoint: db0=https://app0:2380
+          - alias: db1
+            endpoint: db1=https://app1:2380
+          - alias: db2
+            endpoint: db2=https://app2:2380

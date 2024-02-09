@@ -8,9 +8,28 @@ PostDown = iptables -t nat -D POSTROUTING -o {{ config[inventory_hostname].wireg
 ListenPort = {{ config[inventory_hostname].wireguard.port }}
 
 {% for gw in vars['play_hosts'] %}
+# for this initial wireguard configuration, our servers
+# need to peer with all the nodes that will be in the network
+{#
+{% if "gw" in gw %}
+#}
 [Peer]
 PublicKey = {{ hostvars[gw].public_key }} 
 Endpoint = {{ config[gw].interfaces[config[gw].wireguard.internet].address }}:{{ config[gw].wireguard.port }} 
 AllowedIPs = {{ config[gw].wireguard.address }}/32
 
+{% endif %}
 {% endfor %}
+
+{#
+{% set inv = inventory_hostname %}
+{% for app in vars['play_hosts'] %}
+{% if "app" in app and config[app].wireguard.home == inv %}
+[Peer]
+PublicKey = {{ hostvars[app].public_key }} 
+Endpoint = {{ config[app].interfaces[config[app].wireguard.internet].address }}:{{ config[app].wireguard.port }} 
+AllowedIPs = {{ config[app].wireguard.address }}/32
+
+{% endif %}
+{% endfor %}
+#}

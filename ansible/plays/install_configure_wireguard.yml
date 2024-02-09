@@ -1,4 +1,4 @@
-- hosts: ['hgw0', 'hgw1', 'gw0', 'gw1', 'gw2', 'gw3', 'gw4', 'gw5']
+- hosts: [gateways, apps]
   tasks:
     - name: update cache
       apt:
@@ -79,7 +79,7 @@
         public_key: "{{ wgpub.stdout }}"
 
 
-- hosts: ['hgw0', 'hgw1', 'gw0', 'gw1', 'gw2', 'gw3', 'gw4', 'gw5']
+- hosts: [gateways, apps]
   tasks:
     # the name of the file dictates the interface name
     # https://github.com/pirate/wireguard-docs?tab=readme-ov-file#overview
@@ -88,14 +88,14 @@
         src: ../templates/wireguard-server.conf
         dest: /etc/wireguard/{{ iface_name }}.conf
       become: yes
-      when: '"h" in inventory_hostname'
+      when: '"gw" in inventory_hostname'
 
     - name: copy over our template files
       template:
         src: ../templates/wireguard-client.conf
         dest: /etc/wireguard/{{ iface_name }}.conf
       become: yes
-      when: '"h" not in inventory_hostname'
+      when: '"gw" not in inventory_hostname'
 
     - name: start wireguard (emphemeral)
       shell: wg-quick up {{ iface_name }}

@@ -6,6 +6,17 @@ This repo is a work in progress for implementing a secure overlay network with t
 ## Requirements
 
 [Raven](https://pulwar.isi.edu/sabres/raven)
+[Ansible](https://www.ansible.com/)
+
+## Prerequisites
+
+We are going to use an already create role for install an etcd cluster.
+
+The role is from ISI's mergetb ansible repo and can be found in `requirements.yml`.
+
+```
+$ ansible-galaxy install -r requirements.yml --force
+```
 
 ## Running
 
@@ -18,8 +29,6 @@ This repo is a work in progress for implementing a secure overlay network with t
 ```
 
 ### End state
-
-This will create a topology with 2 home gateways, 6 nodes, and gw0-2 hosts connect to hgw0 and gw3-5 connect to hgw1 using wireguard.
 
 
 ## TODO

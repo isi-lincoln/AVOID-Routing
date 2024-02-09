@@ -1,0 +1,42 @@
+- hosts: localhost
+  tasks:
+    - name: install community crypto package
+      command: ansible-galaxy collection install community.crypto
+      become: yes
+
+- hosts: gateways
+  tasks:
+    - name: Create private key (RSA, 4096 bits)
+      community.crypto.openssl_privatekey:
+        path: /etc/ssl/private/{{ inventory_hostname }}.key
+        #passphrase: ansible
+        #cipher: auto
+        type: RSA
+        size: 4096
+      become: yes
+
+    - name: Create certificate signing request (CSR) for self-signed certificate
+      community.crypto.openssl_csr_pipe:
+        privatekey_path: /etc/ssl/private/{{ inventory_hostname }}.key
+        common_name: "{{ inventory_hostname }}.org"
+        organization_name: NSF Avoid 5G
+        organizational_unit_name: ISI
+        country_name: US
+        state_or_province_name: CA
+        locality_name: LA
+        email_address: trusted@avoid.org
+        subject_alt_name:
+          - "DNS:{{ inventory_hostname }}.org"
+          - "DNS:www.{{ inventory_hostname }}.org"
+        #privatekey_passphrase: ansible
+      register: csr
+      become: yes
+
+    - name: Create simple self-signed certificate
+      community.crypto.x509_certificate:
+        path: /etc/ssl/private/{{ inventory_hostname }}.pem
+        privatekey_path: /etc/ssl/private/{{ inventory_hostname }}.key
+        provider: selfsigned
+        #privatekey_passphrase: ansible
+        csr_content: "{{ csr.csr }}"
+      become: yes

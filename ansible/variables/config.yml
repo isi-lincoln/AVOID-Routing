@@ -25,12 +25,26 @@ config:
         network: ue
         netmask: 24
       eth2:
-        address: 10.1.0.1
+        address: 10.10.0.1
+        network: isp1
+        netmask: 24
+      eth3:
+        address: 
         network: avoid-gw0
         netmask: 24
-    routes:
+      eth4:
+        address: 10.10.10.10
+        network: dns
+        netmask: 24
+      eth5:
+        address: 
+        network: app0
+        netmask: 24
+    ospf:
       eth2:
-        - 10.1.1.0/24
+        area: 10
+      eth3:
+        area: 0
         
   'isp1':
     interfaces:
@@ -42,9 +56,11 @@ config:
         address: 10.2.0.1
         network: avoid-gw1
         netmask: 24
-    routes:
+    ospf:
       eth2:
-        - 10.2.1.0/24
+        area: 0
+      eth3:
+        area: 0
 
   'isp2':
     interfaces:
@@ -56,15 +72,17 @@ config:
         address: 10.3.0.1
         network: avoid-gw2
         netmask: 24
-    routes:
+    ospf:
       eth2:
-        - 10.3.1.0/24
+        area: 12
+      eth3:
+        area: 0
 
   'avoid-gw0':
     wireguard:
       internet: eth1
       port: 51000
-      address: 10.10.0.10
+      address: 192.168.0.10
       netmask: 24
     interfaces:
       eth1:
@@ -83,7 +101,7 @@ config:
     wireguard:
       internet: eth1
       port: 51000
-      address: 10.11.0.11
+      address: 192.168.0.11
       netmask: 24
     interfaces:
       eth1:
@@ -102,7 +120,7 @@ config:
     wireguard:
       internet: eth1
       port: 51000
-      address: 10.11.0.11
+      address: 192.168.0.12
       netmask: 24
     interfaces:
       eth1:
@@ -123,6 +141,12 @@ config:
         address: 10.1.1.100
         network: avoid-gw0
         netmask: 8
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 192.168.0.100
+      netmask: 24
+      home: avoid-gw0
 
   'app1':
     interfaces:
@@ -130,6 +154,12 @@ config:
         address: 10.2.1.100
         network: avoid-gw1
         netmask: 8
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 192.168.0.101
+      netmask: 24
+      home: avoid-gw1
 
   'app2':
     interfaces:
@@ -137,3 +167,9 @@ config:
         address: 10.3.1.100
         network: avoid-gw2
         netmask: 8
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 192.168.0.102
+      netmask: 24
+      home: avoid-gw2

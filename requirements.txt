@@ -1,0 +1,5 @@
+---
+roles:
+  - src: git+https://gitlab.com/mergetb/ansible/etcd
+    name: merge-site
+    version: master
