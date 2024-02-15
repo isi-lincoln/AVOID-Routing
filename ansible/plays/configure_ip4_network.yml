@@ -141,3 +141,19 @@
         - "{{ vars['config'][inventory_hostname].interfaces | list }}"
       become: yes
       when: inventory_hostname in vars['config'] and "address" not in config[inventory_hostname].interfaces[item]
+
+- hosts: [gateways, apps]
+  tasks:
+    - name: remove dns default route (this messes with ansible)
+      command: ip route del default dev {{ item }}
+      with_items:
+        - "{{ vars['config'][inventory_hostname].dhcp | list }}"
+      become: yes
+      when: inventory_hostname in vars['config']
+
+    - name: add 10.0.0.0/8 route instead
+      command: ip route add 10.0.0.0/8 dev {{ item }}
+      with_items:
+        - "{{ vars['config'][inventory_hostname].dhcp | list }}"
+      become: yes
+      when: inventory_hostname in vars['config']

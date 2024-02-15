@@ -78,6 +78,16 @@
       set_fact:
         public_key: "{{ wgpub.stdout }}"
 
+    # TODO: there will be issues if new lease given with different ip
+    - name: get our wireguard address that has been dhcp'd
+      shell: ip -br addr | grep eth1 | sed 's/ \+/ /g' | cut -d ' ' -f 3 | cut -d '/' -f 1
+      register: eths
+      when: inventory_hostname in vars['config']
+
+    - set_fact:
+        wireguard_address: "{{ item }}"
+      with_items:
+        - "{{ eths.stdout_lines }}"
 
 - hosts: [gateways, apps]
   tasks:
