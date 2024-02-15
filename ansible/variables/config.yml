@@ -1,22 +1,22 @@
 iface_name: wg0
 config:
   'ue':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 192.168.0.99
+      netmask: 24
+      home: avoid-gw0
     interfaces:
       eth1:
-        address: 10.0.0.100
+        dhcp: yes
         network: isp0
-        netmask: 24
       eth2:
-        address: 10.0.1.100
+        dhcp: no
         network: isp1
-        netmask: 24
       eth3:
-        address: 10.0.2.100
+        dhcp: no
         network: isp2
-        netmask: 24
-    routes:
-      eth1:
-        - 10.0.0.0/8
 
   'isp0':
     interfaces:
@@ -24,27 +24,29 @@ config:
         address: 10.0.0.1
         network: ue
         netmask: 24
+        dhcp:
+          range:
+            start: 10.0.0.10
+            end:   10.0.0.20
       eth2:
-        address: 10.10.0.1
+        address: 10.0.10.10
         network: isp1
         netmask: 24
       eth3:
-        address: 
-        network: avoid-gw0
+        address: 10.10.10.1
+        network: sw0
         netmask: 24
+        dhcp:
+          range:
+            start: 10.10.10.10
+            end:   10.10.10.20
       eth4:
-        address: 10.10.10.10
-        network: dns
-        netmask: 24
-      eth5:
-        address: 
-        network: app0
+        address: 10.10.0.100
+        network: sw3
         netmask: 24
     ospf:
       eth2:
         area: 10
-      eth3:
-        area: 0
         
   'isp1':
     interfaces:
@@ -52,14 +54,36 @@ config:
         address: 10.0.1.1
         network: ue
         netmask: 24
+        dhcp:
+          range:
+            start: 10.0.1.10
+            end:   10.0.1.20
       eth2:
-        address: 10.2.0.1
-        network: avoid-gw1
+        address: 10.0.10.11
+        network: isp0
+        netmask: 24
+      eth3:
+        address: 10.0.11.10
+        network: isp2
+        netmask: 24
+      eth4:
+        address: 10.10.11.1
+        network: sw1
+        netmask: 24
+        dhcp:
+          range:
+            start: 10.10.11.10
+            end:   10.10.11.20
+      eth5:
+        address: 10.10.0.101
+        network: sw3
         netmask: 24
     ospf:
       eth2:
         area: 0
       eth3:
+        area: 0
+      eth4:
         area: 0
 
   'isp2':
@@ -68,15 +92,47 @@ config:
         address: 10.0.2.1
         network: ue
         netmask: 24
+        dhcp:
+          range:
+            start: 10.0.2.10
+            end: 10.0.2.20
       eth2:
+        address: 10.0.11.12
+        network: isp1
+        netmask: 24
+      eth3:
+        address: 10.10.12.1
+        network: sw2
+        netmask: 24
+        dhcp:
+          range:
+            start: 10.10.12.10
+            end:   10.10.12.20
+      eth4:
         address: 10.3.0.1
-        network: avoid-gw2
+        network: sw3
         netmask: 24
     ospf:
       eth2:
         area: 12
-      eth3:
-        area: 0
+
+  'isp3':
+    interfaces:
+      eth1:
+        address: 10.10.11.2
+        network: isp1
+        netmask: 8
+      eth2:
+        address: 10.10.13.1
+        network: isp1
+        netmask: 24
+        dhcp:
+          range:
+            start: 10.10.13.10
+            end:   10.10.13.20
+    ospf:
+      eth1:
+        area: 13
 
   'avoid-gw0':
     wireguard:
@@ -86,16 +142,9 @@ config:
       netmask: 24
     interfaces:
       eth1:
-        address: 10.1.0.100
         network: isp0
-        netmask: 24
-      eth2:
-        address: 10.1.1.1
-        network: app0
-        netmask: 24
-    routes:
-      eth1:
-        - 10.0.0.0/24
+    dhcp:
+      eth1: yes
 
   'avoid-gw1':
     wireguard:
@@ -105,16 +154,9 @@ config:
       netmask: 24
     interfaces:
       eth1:
-        address: 10.2.0.100
         network: isp1
-        netmask: 24
-      eth2:
-        address: 10.2.1.1
-        network: app1
-        netmask: 24
-    routes:
-      eth1:
-        - 10.0.1.0/24
+    dhcp:
+      eth1: yes
 
   'avoid-gw2':
     wireguard:
@@ -124,52 +166,71 @@ config:
       netmask: 24
     interfaces:
       eth1:
-        address: 10.3.0.100
         network: isp2
-        netmask: 24
-      eth2:
-        address: 10.3.1.1
-        network: app2
-        netmask: 24
-    routes:
-      eth1:
-        - 10.0.1.0/24
+    dhcp:
+      eth1: yes
 
-  'app0':
+  'avoid-gw3':
+    wireguard:
+      internet: eth1
+      port: 51000
+      address: 192.168.0.13
+      netmask: 24
     interfaces:
       eth1:
-        address: 10.1.1.100
-        network: avoid-gw0
-        netmask: 8
+        network: isp3
+    dhcp:
+      eth1: yes
+
+  'app0':
     wireguard:
       internet: eth1
       port: 51000
       address: 192.168.0.100
       netmask: 24
       home: avoid-gw0
-
-  'app1':
     interfaces:
       eth1:
-        address: 10.2.1.100
-        network: avoid-gw1
-        netmask: 8
+        network: avoid-gw0
+    dhcp:
+      eth1: yes
+
+  'app1':
     wireguard:
       internet: eth1
       port: 51000
       address: 192.168.0.101
       netmask: 24
       home: avoid-gw1
-
-  'app2':
     interfaces:
       eth1:
-        address: 10.3.1.100
-        network: avoid-gw2
-        netmask: 8
+        network: avoid-gw1
+    dhcp:
+      eth1: yes
+
+  'app2':
     wireguard:
       internet: eth1
       port: 51000
       address: 192.168.0.102
       netmask: 24
       home: avoid-gw2
+    interfaces:
+      eth1:
+        network: avoid-gw2
+    dhcp:
+      eth1: yes
+
+  'dns':
+    interfaces:
+      eth1:
+        address: 10.10.0.11
+        network: isps
+        netmask: 8
+
+  'authority':
+    interfaces:
+      eth1:
+        address: 10.10.0.10
+        network: isps
+        netmask: 8

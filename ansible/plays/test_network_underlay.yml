@@ -1,0 +1,44 @@
+- hosts: all
+  tasks:
+    - name: get all ip addresses for interfaces
+      shell: ip -br addr | grep eth | grep -v eth0 | sed 's/ \+/ /g' | cut -d ' ' -f 3 | cut -d '/' -f 1
+      register: eths
+      when: inventory_hostname in vars['config']
+
+
+    # check its a 10.X.X.X/8 address
+    - set_fact:
+        ifaces: "{{ ifaces | default([]) + [item] }}"
+      #when: '"10." in item'
+      with_items:
+        - "{{ eths.stdout_lines }}"
+
+    #- debug: var=all_ifaces
+
+- hosts: isps
+  tasks:
+    - name: set hostnames
+      set_fact:
+        hostnames: "{{ config | list }}"
+
+    - debug: var=hostnames
+
+    - name: set dicts
+      set_fact:
+        #all_ips: "{{ all_ips|default({})|combine({item: hostvars[item]['ifaces'] }) }}"
+        all_ips: "{{ all_ips|default([]) + hostvars[item]['ifaces'] }}"
+      with_items:
+        - "{{ hostnames }}"
+
+#    - debug: var=all_ips
+
+#    - name: set flat
+#      set_fact:
+#        all_flat: "{{ all_ips|flatten }}"
+#
+#    - debug: var=all_flat
+
+    - name: ping all other interfaces for reachability
+      shell: ping -c 5 {{ item }}
+      with_items:
+        - "{{ all_ips }}"

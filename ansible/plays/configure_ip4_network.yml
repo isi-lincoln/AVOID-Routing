@@ -1,23 +1,11 @@
-- hosts: [isps, gateways]
-  tasks:
-    - name: copy over sys config file for forwarding from frr
-      copy:
-        src: ../files/sysctl.conf
-        dest: /etc/sysctl.d/99frr_defaults.conf
-      become: yes
-
-    - name: set all sysctl values
-      command: sysctl -p /etc/sysctl.d/99frr_defaults.conf
-      become: yes
-
-- hosts: all
+- hosts: [isps, gateways, apps, dnss]
   tasks:
     - name: get all addresses
       shell: ip -br addr | grep eth | grep -v eth0 | cut -d ' ' -f 1
       register: num_eths
       when: inventory_hostname in vars['config']
 
-    - debug: var=num_eths
+    #- debug: var=num_eths
 
     - set_fact:
         ifaces: "{{ num_eths.stdout_lines }}"
@@ -31,11 +19,11 @@
       when: inventory_hostname in vars['config']
 
     - name: addr interface
-      command: ip addr add {{ vars['config'][inventory_hostname].interfaces[item]["address"] }}/{{ vars['config'][inventory_hostname].interfaces[item]["netmask"] }} dev {{ item }}
+      command: ip addr add {{ config[inventory_hostname].interfaces[item]["address"] }}/{{ config[inventory_hostname].interfaces[item]["netmask"] }} dev {{ item }}
       with_items:
-        - "{{ vars['config'][inventory_hostname].interfaces | list }}"
+        - "{{ config[inventory_hostname].interfaces | list }}"
       become: yes
-      when: inventory_hostname in vars['config']
+      when: inventory_hostname in config and "address" in config[inventory_hostname].interfaces[item]
 
     - name: up interface
       command: ip link set dev {{ item }} up
@@ -44,9 +32,112 @@
       become: yes
       when: inventory_hostname in vars['config']
 
-    - name: add routes
-      command: ip route add {{ vars['config'][inventory_hostname].routes[item][0] }} dev {{ item }}
+- hosts: [isps]
+  become: yes
+  tasks:
+    - name: Recursively remove directory
+      file:
+        path: /etc/apt/sources.list.d/frr.list
+        state: absent
+
+    - name: install lsb-release for frr script
+      shell: apt-get --allow-releaseinfo-change update
+
+    - name: install lsb-release for frr script
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - lsb-release
+        - gnupg2
+
+    - name: copy frr deb script
+      copy:
+        src: ../files/add-frr.sh
+        dest: /etc/apt/add-frr.sh
+        owner: root
+        group: root
+        mode: 0755
+ 
+    # bug in current frr 7.5.1 with ospfv6, missing conf t, int eth1, ipv6 ospf6 area option (which enables ospf on the interface- big oops)   
+    - name: install frr from deb
+      command: /etc/apt/add-frr.sh
+
+    - name: install networking packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - ntp
+        - ethtool
+        - frr
+        - tcpdump
+        - lldpd
+
+    - name: stop frr
+      systemd:
+        name: frr
+        state: stopped
+
+    - name: copy over sys config file for forwarding from frr
+      copy:
+        src: ../files/sysctl.conf
+        dest: /etc/sysctl.d/99frr_defaults.conf
+
+    - name: set all sysctl values
+      command: sysctl -p /etc/sysctl.d/99frr_defaults.conf
+
+    - name: copy over daemons file
+      copy:
+        src: ../files/daemons
+        dest: /etc/frr/daemons
+
+    - name: copy over frr template
+      template:
+        src: ../templates/frr.conf
+        dest: /etc/frr/frr.conf
+
+    - name: reload frr
+      systemd:
+        name: frr
+        daemon_reload: yes
+        state: reloaded
+
+    - name: restart frr
+      systemd:
+        name: frr
+        state: restarted
+
+- hosts: [isps]
+  become: yes
+  tasks:
+    - name: install dnsmasq for dhcp servers
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - dnsmasq
+
+    - name: ensure dnsmasq is not running
+      command: killall dnsmasq
+      ignore_errors: yes
+
+    # TODO: check if 
+    - name: begin running dnsmasq
+      command: dnsmasq --interface={{ item }} --except-interface=lo --bind-interfaces --dhcp-range={{ config[inventory_hostname].interfaces[item].dhcp.range.start }},{{ config[inventory_hostname].interfaces[item].dhcp.range.end }},1h
       with_items:
-        - "{{ vars['config'][inventory_hostname].routes | list }}"
+        - "{{ vars['config'][inventory_hostname].interfaces | list }}"
+      when: inventory_hostname in vars['config'] and "dhcp" in config[inventory_hostname].interfaces[item]
+
+
+- hosts: all
+  tasks:
+    - name: dhcp interface
+      command: dhclient -v -4 {{ item }}
+      with_items:
+        - "{{ vars['config'][inventory_hostname].interfaces | list }}"
       become: yes
-      when: inventory_hostname in vars['config'] and "routes" in vars['config'][inventory_hostname]
+      when: inventory_hostname in vars['config'] and "address" not in config[inventory_hostname].interfaces[item]
