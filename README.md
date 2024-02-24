@@ -10,12 +10,10 @@ This repo is a work in progress for implementing a secure overlay network with t
 
 ## Prerequisites
 
-We are going to use an already create role for install an etcd cluster.
-
-The role is from ISI's mergetb ansible repo and can be found in `requirements.yml`.
+We need to pull our etcd role submodule for ansible.  Required for `stage-4.sh`.
 
 ```
-$ ansible-galaxy install -r requirements.yml --force
+$ git submodule update --init --recursive
 ```
 
 ## Running
@@ -26,6 +24,7 @@ $ ansible-galaxy install -r requirements.yml --force
 ./stage-1.sh
 ./stage-2.sh
 ./stage-3.sh
+./stage-4.sh
 ```
 
 ### End state
