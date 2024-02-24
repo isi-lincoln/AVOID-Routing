@@ -1,2 +1,5 @@
 .*.swp
 .rvn
+ansible/plays/*.json
+ansible/plays/*.csr
+ansible/plays/*.pem

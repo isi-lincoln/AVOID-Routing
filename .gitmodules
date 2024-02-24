@@ -1,0 +1,3 @@
+[submodule "ansible/plays/roles/etcd"]
+	path = ansible/plays/roles/etcd
+	url = https://github.com/isi-lincoln/ansible-etcd.git
