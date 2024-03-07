@@ -16,15 +16,12 @@
 - hosts: [apps]
   become: true
   vars:
-    app0:
-      ip: "{{ config['app0']['wireguard']['address'] }}"
-      alias: db0
     app1:
-      ip: "{{ config['app1']['wireguard']['address'] }}"
       alias: db1
     app2:
-      ip: "{{ config['app2']['wireguard']['address'] }}"
       alias: db2
+    app3:
+      alias: db3
   tasks:
     - import_role:
         name: etcd
@@ -34,12 +31,12 @@
         address: "{{ inventory_hostname_short }}"
         ip: "{{ config[inventory_hostname]['wireguard']['address'] }}"
         hosts:
-          - alias: db0
-            endpoint: db0=https://app0:2380
           - alias: db1
             endpoint: db1=https://app1:2380
           - alias: db2
             endpoint: db2=https://app2:2380
+          - alias: db3
+            endpoint: db0=https://app3:2380
 
 # create a proxy on the gateways
 #- hosts: [gateways]

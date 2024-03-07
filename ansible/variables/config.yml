@@ -1,12 +1,32 @@
-iface_name: wg0
+nebula_iface_name: neb1
+overlay:
+  'lh0':
+     ip: 192.168.0.1
+     netmask: 24
+     network: nebula
+  'avoid-gw0':
+     ip: 192.168.0.10
+     netmask: 24
+     network: nebula
+  'avoid-gw1':
+     ip: 192.168.0.11
+     netmask: 24
+     network: nebula
+  'avoid-gw2':
+     ip: 192.168.0.12
+     netmask: 24
+     network: nebula
+  'avoid-gw3':
+     ip: 192.168.0.13
+     netmask: 24
+     network: nebula
+  'ue':
+     ip: 192.168.0.100
+     netmask: 24
+     network: nebula
+
 config:
   'ue':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 192.168.0.99
-      netmask: 24
-      home: avoid-gw0
     interfaces:
       eth1:
         dhcp: yes
@@ -124,22 +144,25 @@ config:
         netmask: 8
       eth2:
         address: 10.10.13.1
-        network: isp1
+        network: avoid-gw3
         netmask: 24
         dhcp:
           range:
             start: 10.10.13.10
             end:   10.10.13.20
+      eth3:
+        address: 10.10.14.1
+        network: app3
+        netmask: 24
+        dhcp:
+          range:
+            start: 10.10.14.10
+            end:   10.10.14.20
     ospf:
       eth1:
         area: 13
 
   'avoid-gw0':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 192.168.0.10
-      netmask: 24
     interfaces:
       eth1:
         network: isp0
@@ -147,11 +170,6 @@ config:
       eth1: yes
 
   'avoid-gw1':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 192.168.0.11
-      netmask: 24
     interfaces:
       eth1:
         network: isp1
@@ -159,11 +177,6 @@ config:
       eth1: yes
 
   'avoid-gw2':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 192.168.0.12
-      netmask: 24
     interfaces:
       eth1:
         network: isp2
@@ -171,37 +184,13 @@ config:
       eth1: yes
 
   'avoid-gw3':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 192.168.0.13
-      netmask: 24
     interfaces:
       eth1:
         network: isp3
     dhcp:
       eth1: yes
 
-  'app0':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 192.168.0.100
-      netmask: 24
-      home: avoid-gw0
-    interfaces:
-      eth1:
-        network: avoid-gw0
-    dhcp:
-      eth1: yes
-
   'app1':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 192.168.0.101
-      netmask: 24
-      home: avoid-gw1
     interfaces:
       eth1:
         network: avoid-gw1
@@ -209,15 +198,16 @@ config:
       eth1: yes
 
   'app2':
-    wireguard:
-      internet: eth1
-      port: 51000
-      address: 192.168.0.102
-      netmask: 24
-      home: avoid-gw2
     interfaces:
       eth1:
         network: avoid-gw2
+    dhcp:
+      eth1: yes
+
+  'app3':
+    interfaces:
+      eth1:
+        network: isp3
     dhcp:
       eth1: yes
 
@@ -233,4 +223,11 @@ config:
       eth1:
         address: 10.10.0.10
         network: isps
+        netmask: 8
+
+  'lh0':
+    interfaces:
+      eth1:
+        address: 10.10.10.2
+        network: isp0
         netmask: 8

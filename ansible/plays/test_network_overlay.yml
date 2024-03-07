@@ -1,21 +1,26 @@
-- hosts: isps
+- hosts: [nebula, lighthouses]
   tasks:
-    - name: get all ip addresses for interfaces
-      shell: ip -br addr | grep eth | grep -v eth0 | sed 's/ \+/ /g' | cut -d ' ' -f 3 | cut -d '/' -f 1
-      register: eths
-      when: inventory_hostname in vars['config']
+    - name: install jq
+      apt:
+        pkg: jq
+        state: latest
+      become: yes
 
-    # check its a 10.X.X.X/8 address
+    - name: get all ip addresses for interfaces
+      shell: ip -json -br addr | jq '.[] | select(.ifname == "neb1").addr_info[] | select(.local|startswith("192")).local' | sed 's/"//g'
+      register: eths
+      when: inventory_hostname in overlay
+
     - set_fact:
         ifaces: "{{ ifaces | default([]) + [item] }}"
-      #when: '"10." in item'
       with_items:
         - "{{ eths.stdout_lines }}"
 
-    #- debug: var=all_ifaces
+    - debug: var=ifaces
+
     - name: set hostnames
       set_fact:
-        hostnames: "{{ config | list }}"
+        hostnames: "{{ overlay | list }}"
 
     - debug: var=hostnames
 
@@ -25,7 +30,7 @@
         all_ips: "{{ all_ips|default([]) + hostvars[item]['ifaces'] }}"
       with_items:
         - "{{ hostnames }}"
-      when: '"isp" in item'
+      when: '"ue" not in item'
 
 #    - debug: var=all_ips
 

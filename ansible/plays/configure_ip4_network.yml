@@ -1,4 +1,4 @@
-- hosts: [isps, gateways, apps, dnss]
+- hosts: [isps, gateways, apps, dnss, lighthouses]
   tasks:
     - name: get all addresses
       shell: ip -br addr | grep eth | grep -v eth0 | cut -d ' ' -f 1
@@ -127,7 +127,7 @@
 
     # TODO: check if 
     - name: begin running dnsmasq
-      command: dnsmasq --interface={{ item }} --except-interface=lo --bind-interfaces --dhcp-range={{ config[inventory_hostname].interfaces[item].dhcp.range.start }},{{ config[inventory_hostname].interfaces[item].dhcp.range.end }},1h
+      command: dnsmasq --interface={{ item }} --except-interface=lo --bind-interfaces --dhcp-range={{ config[inventory_hostname].interfaces[item].dhcp.range.start }},{{ config[inventory_hostname].interfaces[item].dhcp.range.end }},1h --dhcp-option=121,10.0.0.0/8,{{ config[inventory_hostname].interfaces[item].address }}
       with_items:
         - "{{ vars['config'][inventory_hostname].interfaces | list }}"
       when: inventory_hostname in vars['config'] and "dhcp" in config[inventory_hostname].interfaces[item]
@@ -141,19 +141,3 @@
         - "{{ vars['config'][inventory_hostname].interfaces | list }}"
       become: yes
       when: inventory_hostname in vars['config'] and "address" not in config[inventory_hostname].interfaces[item]
-
-- hosts: [gateways, apps]
-  tasks:
-    - name: remove dns default route (this messes with ansible)
-      command: ip route del default dev {{ item }}
-      with_items:
-        - "{{ vars['config'][inventory_hostname].dhcp | list }}"
-      become: yes
-      when: inventory_hostname in vars['config']
-
-    - name: add 10.0.0.0/8 route instead
-      command: ip route add 10.0.0.0/8 dev {{ item }}
-      with_items:
-        - "{{ vars['config'][inventory_hostname].dhcp | list }}"
-      become: yes
-      when: inventory_hostname in vars['config']

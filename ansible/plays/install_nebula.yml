@@ -1,0 +1,17 @@
+- hosts: [nebula, lighthouses]
+  become: true
+  vars:
+  tasks:
+    - import_role:
+        name: nebula-role
+      vars:
+        nebula_network_name: "avoid-nebula"
+        nebula_node_use_lighthouse_as_relay: false
+        nebula_lighthouses_inventory: [lh0]
+        nebula_lighthouse_hostname: lh0
+        nebula_interface_name: "{{ nebula_iface_name }}"
+        nebula_lighthouse_public_hostname: "{{ config['lh0'].interfaces.eth1.address }}"
+        nebula_lighthouse_internal_ip_addr: "{{ overlay['lh0'].ip }}"
+        nebula_network_cidr: "{{ overlay['lh0'].netmask }}"
+        nebula_clean_install: true
+        nebula_internal_ip_addr: "{{ overlay[inventory_hostname].ip }}"
