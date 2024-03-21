@@ -4,7 +4,7 @@ overlay:
      ip: 192.168.0.1
      netmask: 24
      network: nebula
-  'avoid-gw1':
+  'avoid-gw0':
      ip: 192.168.0.10
      netmask: 24
      network: nebula
