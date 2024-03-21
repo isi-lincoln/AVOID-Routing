@@ -5,8 +5,8 @@
     - import_role:
         name: nebula-role
       vars:
-        nebula_network_name: "avoid-nebula"
-        nebula_fqdn: "{{nebula_network_name}}.org"
+        nebula_network_name: "{{ nebula_network_domain }}"
+        nebula_fqdn: "{{ nebula_network_fqdn }}"
         nebula_node_use_lighthouse_as_relay: false
         nebula_lighthouses_inventory: [lh0]
         nebula_lighthouse_hostname: lh0

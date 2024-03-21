@@ -1,6 +1,6 @@
-[submodule "ansible/plays/roles/etcd"]
-	path = ansible/plays/roles/etcd
-	url = https://github.com/isi-lincoln/ansible-etcd.git
 [submodule "ansible/roles/nebula-role"]
 	path = ansible/roles/nebula-role
 	url = git@github.com:isi-lincoln/nebula-role.git
+[submodule "ansible/roles/etcd"]
+	path = ansible/roles/etcd
+	url = git@github.com:isi-lincoln/ansible-etcd.git

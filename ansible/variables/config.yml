@@ -1,4 +1,6 @@
 nebula_iface_name: neb1
+nebula_network_domain: avoid-nebula
+nebula_network_fqdn: avoid-nebula.org
 overlay:
   'lh0':
      ip: 192.168.0.1
