@@ -133,11 +133,10 @@
       when: inventory_hostname in vars['config'] and "dhcp" in config[inventory_hostname].interfaces[item]
 
 
-- hosts: all
+- hosts: dhcpers
   tasks:
     - name: dhcp interface
       command: dhclient -v -4 {{ item }}
-      with_items:
-        - "{{ vars['config'][inventory_hostname].interfaces | list }}"
+      loop:  "{{ vars['config'][inventory_hostname].interfaces | list }}"
       become: yes
-      when: inventory_hostname in vars['config'] and "address" not in config[inventory_hostname].interfaces[item]
+      when: config[inventory_hostname].interfaces[item].dhcp

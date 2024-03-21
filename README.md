@@ -24,16 +24,15 @@ $ git submodule update --init --recursive
 ./stage-1.sh
 ./stage-2.sh
 ./stage-3.sh
+./test-stage3-connectivity.sh
 ./stage-4.sh
+./test-stage4-connectivity.sh
 ```
 
 ### End state
 
 
 ## TODO
-
-A way to do this without server needing peer certificates.
-
 
 ## Reading
 

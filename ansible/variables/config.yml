@@ -4,7 +4,7 @@ overlay:
      ip: 192.168.0.1
      netmask: 24
      network: nebula
-  'avoid-gw0':
+  'avoid-gw1':
      ip: 192.168.0.10
      netmask: 24
      network: nebula
@@ -22,6 +22,18 @@ overlay:
      network: nebula
   'ue':
      ip: 192.168.0.100
+     netmask: 24
+     network: nebula
+  'app1':
+     ip: 192.168.0.21
+     netmask: 24
+     network: nebula
+  'app2':
+     ip: 192.168.0.22
+     netmask: 24
+     network: nebula
+  'app3':
+     ip: 192.168.0.23
      netmask: 24
      network: nebula
 
@@ -166,50 +178,43 @@ config:
     interfaces:
       eth1:
         network: isp0
-    dhcp:
-      eth1: yes
+        dhcp: yes
 
   'avoid-gw1':
     interfaces:
       eth1:
         network: isp1
-    dhcp:
-      eth1: yes
+        dhcp: yes
 
   'avoid-gw2':
     interfaces:
       eth1:
         network: isp2
-    dhcp:
-      eth1: yes
+        dhcp: yes
 
   'avoid-gw3':
     interfaces:
       eth1:
         network: isp3
-    dhcp:
-      eth1: yes
+        dhcp: yes
 
   'app1':
     interfaces:
       eth1:
         network: avoid-gw1
-    dhcp:
-      eth1: yes
+        dhcp: yes
 
   'app2':
     interfaces:
       eth1:
         network: avoid-gw2
-    dhcp:
-      eth1: yes
+        dhcp: yes
 
   'app3':
     interfaces:
       eth1:
         network: isp3
-    dhcp:
-      eth1: yes
+        dhcp: yes
 
   'dns':
     interfaces:
