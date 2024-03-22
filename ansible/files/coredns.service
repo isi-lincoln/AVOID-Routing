@@ -1,0 +1,25 @@
+[Unit]
+Description=coredns
+Documentation=https://github.com/coredns/coredns
+Requires=docker.service
+Wants=network.target
+After=network-online.target
+
+[Service]
+ExecStartPre=sh -c '/usr/bin/docker kill CoreDNS || /usr/bin/true'
+ExecStartPre=sh -c '/usr/bin/docker rm CoreDNS || /usr/bin/true'
+ExecStart=/usr/bin/docker run --rm \
+  --volume=/etc/coredns/Corefile:/etc/coredns/Corefile \
+  --volume=/etc/coredns/avoid.zone:/etc/coredns/avoid.zone \
+  --name CoreDNS --network host \
+  docker.io/isilincoln/avoid-coredns \
+  /coredns/coredns -conf /etc/coredns/Corefile
+ExecStartPre=sh -c '/usr/bin/docker stop CoreDNS || /usr/bin/true'
+RemainAfterExit=1
+Restart=on-failure
+RestartSec=5
+Type=simple
+
+[Install]
+Alias=CoreDNS
+WantedBy=multi-user.target

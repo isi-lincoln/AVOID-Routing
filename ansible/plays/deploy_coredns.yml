@@ -1,0 +1,101 @@
+- hosts: [lighthouses]
+  tasks:
+    - name: disable systemd-resolved
+      command: systemctl disable systemd-resolved
+      become: yes
+
+    - name: stop systemd-resolved
+      command: systemctl stop systemd-resolved
+      become: yes
+
+    - name: change resolver to public resolver from self
+      lineinfile:
+        path: /etc/resolv.conf
+        regexp: '^nameserver'
+        line: "nameserver 8.8.8.8"
+      become: yes
+      
+    - name: Install aptitude
+      apt:
+        name: aptitude
+        state: latest
+        update_cache: true
+      become: yes
+    
+    - name: Install required system packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: latest
+        update_cache: true
+      become: yes
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      become: yes
+    
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+      become: yes
+    
+    - name: Update apt and install docker-ce
+      apt:
+        pkg:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+        update_cache: true
+      become: yes
+
+# copy over coredns files
+    - name: Recursively remove coredns directory
+      file:
+        path: /etc/coredns
+        state: absent
+      become: yes
+
+    - name: create coredns directory
+      file:
+        path: /etc/coredns
+        state: directory
+      become: yes
+
+    - name: copy over coredns Corefile and zone file
+      template:
+        src: ../templates/{{ item }}.j2
+        dest: /etc/coredns/{{ item }}
+      loop:
+        - avoid.zone
+        - Corefile
+      become: yes
+
+# copy over service file
+    - name: copy over coredns docker service file
+      copy:
+        src: ../files/coredns.service
+        dest: /etc/systemd/system/coredns.service
+      become: yes
+
+# pull image
+    - name: git pull the avoid coredns image
+      command: docker pull docker.io/isilincoln/avoid-coredns
+      retries: 5
+      delay: 3
+      register: result
+      until: result.rc == 0
+      become: yes
+
+# restart service
+    - name: start the coredns service
+      command: service coredns restart
+      become: yes

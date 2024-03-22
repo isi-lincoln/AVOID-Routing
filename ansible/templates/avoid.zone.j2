@@ -1,0 +1,18 @@
+$TTL    0
+$ORIGIN {{ nebula_network_fqdn }}.
+@                    IN  SOA   lh0.{{ nebula_network_fqdn }}. contact.{{ nebula_network_fqdn }}. (
+                                               2019121301 ; serial
+                                               1d ; refresh
+                                               2h ; retry
+                                               4w ; expire
+                                               1h ; nxdomain ttl
+                                              )
+    
+ns                   IN  NS  lh0.{{ nebula_network_fqdn }}.
+gw1                  IN  A   {{ overlay["avoid-gw1"].ip }}
+gw2                  IN  A   {{ overlay["avoid-gw2"].ip }}
+gw3                  IN  A   {{ overlay["avoid-gw3"].ip }}
+app1                 IN  A   {{ overlay["app1"].ip }}
+app2                 IN  A   {{ overlay["app2"].ip }}
+app3                 IN  A   {{ overlay["app3"].ip }}
+ue                   IN  A   {{ overlay["ue"].ip }}

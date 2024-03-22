@@ -1,6 +1,6 @@
 # /etc/coredns/Corefile
 
-avoid.org:53 {
+{{ nebula_network_fqdn }}:53 {
     file /etc/coredns/avoid.zone
     reload 2s
 
@@ -17,10 +17,10 @@ avoid.org:53 {
     health
     ready
 
-    hosts /etc/coredns/avoid.db avoid.org {
-        10.1.0.100 gw0.avoid.org
-        10.2.0.100 gw1.avoid.org
-        10.3.0.100 gw2.avoid.org
+    hosts /etc/coredns/avoid.zone {{ nebula_network_fqdn }} {
+        {{ overlay["avoid-gw1"].ip }} gw1.{{ nebula_network_fqdn }}
+        {{ overlay["avoid-gw2"].ip }} gw1.{{ nebula_network_fqdn }}
+        {{ overlay["avoid-gw3"].ip }} gw1.{{ nebula_network_fqdn }}
         ttl 10
         no_reverse
         fallthrough
