@@ -1,0 +1,8 @@
+{
+    "{{ overlay['lh0'].ip }}": {
+        "lighthouse": false,
+        "destinations": [
+            "{{ nebula_network_fqdn }}:4242"
+        ]
+    }
+}

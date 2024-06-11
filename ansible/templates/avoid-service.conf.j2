@@ -1,0 +1,6 @@
+avoid:
+  endpoints:
+    - {{ config['overlay']['avoid-gw0'] }}:55554
+    - {{ config['overlay']['avoid-gw1'] }}:55554
+    - {{ config['overlay']['avoid-gw2'] }}:55554
+  identity: {{ inventory_hostname }}

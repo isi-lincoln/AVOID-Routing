@@ -1,0 +1,35 @@
+# Assumes configure_ue has been called.
+
+- hosts: [ue]
+  tasks:
+    - name: update repos
+      command: apt update --fix-missing
+      become: yes
+
+    - name: curl to get nvm installer
+      shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+    - name: install nvm
+      shell: source .nvm/nvm.sh && nvm install 20
+      args:
+        executable: /bin/bash
+
+    - name: install appium
+      shell: source .nvm/nvm.sh && npm install -i -g appium
+      args:
+        executable: /bin/bash
+
+
+- hosts: [ue]
+  tasks:
+    - import_role:
+        name: androidstudio
+      vars:
+        android_sdks:
+          - platform-tools
+          - emulator
+          - build-tools;33.0.0
+          - platforms;android-33
+          - sources;android-33
+          - patcher;v4
+        sdk_location: ~/Android/Sdk

@@ -1,0 +1,26 @@
+{
+  "name": "phone-test",
+  "id": "13b2ea10-0000-0000-0000-a81b5b2bb56d",
+  "staticHostmap": {
+    "{{ overlay['lh0'].ip  }}": {
+        "lighthouse": false,
+        "destinations": [
+            "{{ nebula_network_fqdn }}:4242"
+        ]
+    }
+  },
+  "ca": [],
+  "certInfo": null,
+  "lhDuration": 0,
+  "port": 0,
+  "cipher": "aes",
+  "sortKey": 0,
+  "mtu": 1300,
+  "connected": false,
+  "status": "",
+  "logFile": "",
+  "logVerbosity": "info",
+  "errors": [],
+  "unsafeRoutes": [],
+  "lastManagedUpdate": null
+}

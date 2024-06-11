@@ -4,3 +4,15 @@
 [submodule "ansible/roles/etcd"]
 	path = ansible/roles/etcd
 	url = git@github.com:isi-lincoln/ansible-etcd.git
+[submodule "ansible/roles/ansible-homebrew"]
+	path = ansible/roles/ansible-homebrew
+	url = https://github.com/ProfessorManhattan/ansible-homebrew.git
+[submodule "ansible/roles/ansible-snapd"]
+	path = ansible/roles/ansible-snapd
+	url = https://github.com/ProfessorManhattan/ansible-snapd.git
+[submodule "ansible/roles/androidstudio"]
+	path = ansible/roles/androidstudio
+	url = https://github.com/isi-lincoln/ansible-androidstudio.git
+[submodule "ansible/roles/ansible-java"]
+	path = ansible/roles/ansible-java
+	url = https://github.com/isi-lincoln/ansible-java.git

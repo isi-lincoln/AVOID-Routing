@@ -1,0 +1,114 @@
+- hosts: [ue]
+  tasks:
+    - name: install ubuntu desktop
+      apt:
+        pkg: ubuntu-desktop
+        state: present
+        update_cache: yes
+      become: yes
+
+    - name: copy our custom kernel module
+      copy:
+        src: ../files/{{ item }}
+        dest: /home/rvn/{{ item }}
+      loop:
+        - linux-image-5.15.148-custom_5.15.148-custom-1_amd64.deb
+        - linux-headers-5.15.148-custom_5.15.148-custom-1_amd64.deb
+      become: yes
+
+    - name: install our custom module
+      apt:
+        deb: /home/rvn/{{ item }}
+      loop:
+        - linux-image-5.15.148-custom_5.15.148-custom-1_amd64.deb
+        - linux-headers-5.15.148-custom_5.15.148-custom-1_amd64.deb
+      become: yes
+
+    - name: copy our apk over
+      copy:
+        src: ../files/universal.apk
+        dest: /home/rvn/universal.apk
+      become: yes
+
+    - name: copy over the config files
+      template:
+        src: ../templates/{{ item }}
+        dest: /home/rvn/{{ item }}
+      loop:
+        - phone_config.json
+        - phone_static_hosts.json
+
+    #- name: reboot machine
+    #  reboot:
+    #  become: yes
+
+    - name: need to remount after reboot
+      shell: mount -a
+      become: yes
+
+    - name: partition extra disk
+      community.general.parted:
+        device: /dev/vda
+        number: 1
+        state: present
+      become: yes
+
+    - name: setup extra disk as an ext4 filesystem
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/vda1
+      become: yes
+
+    - name: unmount /var/lib/waydroid
+      ansible.posix.mount:
+        path: /var/lib/waydroid
+        state: absent
+      loop:
+        - /var/lib/waydroid
+      become: yes
+      ignore_errors: yes
+
+    - name: remove all /var/snap data
+      ansible.builtin.file:
+        path: /var/snap
+        state: absent
+      become: yes
+
+    - name: Mount and bind a volume
+      ansible.posix.mount:
+        path: /var/snap
+        src: /dev/vda1
+        opts: rw,noatime
+        state: mounted
+        fstype: ext4
+      become: yes
+
+    - name: update repos
+      command: apt update --fix-missing
+      become: yes
+
+    - name: install anbox
+      shell: curl https://repo.waydro.id | sudo bash
+      become: yes
+
+    - name: install adb
+      apt:
+        pkg:
+          - android-tools-adb
+          - waydroid
+      become: yes
+
+    - name: enable as a systemd waydroid container
+      command: sudo systemctl enable --now waydroid-container
+      become: yes
+
+    - name: start waydroid container start
+      command: sudo waydroid container start
+      become: yes
+
+    - name: start waydroid initializing
+      command: waydroid init
+      become: yes
+
+    - name: start waydroid session
+      command: waydroid session start

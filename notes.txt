@@ -1,0 +1,1 @@
+disabling systemd-resolvd:  https://askubuntu.com/questions/1192633/how-to-properly-disable-systemd-resolved

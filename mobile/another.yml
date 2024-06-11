@@ -1,0 +1,33 @@
+---
+- hosts: localhost
+  tasks:
+  - name: set things
+    set_fact:
+      cmdline_tools_platform_code: 33
+
+  - name: print things
+    debug:
+      var: cmdline_tools_platform_code
+
+  - name: "Fetch Downloads page"
+    uri:
+      return_content: true
+      url: 'https://developer.android.com/studio'
+    register: android_studio_download_page
+
+  - name: Save regex value to a variable
+    set_fact:
+      cmdline_tools_regex: "(commandlinetools-{{ cmdline_tools_platform_code }}-\\d*_latest\\.zip)[\\dtdrbuonMGB<>\\/\\n ]*>([\\w]*)"
+ 
+  - name: lazy shasum
+    shell: 'curl https://developer.android.com/studio | grep -A10 sdk_linux_download | grep -A4 "zip" | grep td | tail -n1 | grep -Po "[\d].*[\d]"'
+    register: checksum 
+
+  - name: Find the checksum of the installer
+    set_fact:
+      data: "{{ android_studio_download_page.content | regex_search(cmdline_tools_regex) }}"
+      cmdline_tools_checksum: "{{ android_studio_download_page.content | regex_search(cmdline_tools_regex) | regex_replace(cmdline_tools_regex, '\\2') }}"
+      cmdline_tools_file_name: "{{ android_studio_download_page.content | regex_search(cmdline_tools_regex) | regex_replace(cmdline_tools_regex, '\\1') }}"
+  
+  - debug:
+      var: checksum.stdout

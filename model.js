@@ -6,7 +6,7 @@
  *                         lighthouse 
  *                             |
  *                             |
- *      dns     isp 0  ------ sw0 ------ avoid-gw0 
+ *      dns     isp 0  ------ sw0 ------ avoid-gw0 (CA, not in overlay)
  *       |    /  |   
  *       |   /   |            app1
  *       |  /    |             |
@@ -33,7 +33,8 @@ topo = {
             "app1", "app2", "app3",
             "lh0",
             "dns", "authority",
-            "ue"].map(x => node(x)),
+            ].map(x => node(x)),
+            phone("ue"),
     ],
     switches: ["sw0", "sw1", "sw2", "sw3"].map(x => sw(x)),
     links: [
@@ -67,6 +68,22 @@ topo = {
         v2v("sw3",      3, "isp1", 5,        { mac: { "dns":       '04:70:00:00:07:04', "sw3": '04:70:00:00:07:14' } }),
         v2v("sw3",      4, "isp2", 4,        { mac: { "dns":       '04:70:00:00:07:05', "sw3": '04:70:00:00:07:15' } }),
     ]
+}
+
+
+function phone(name) {
+    return {
+        name: name,
+        defaultnic: 'e1000',
+        defaultdisktype: { dev: 'sda', bus: 'sata' },
+        image: 'ubuntu-2204',
+        mounts: [{ source: env.PWD, point: "/avoid" }], 
+        disks: [ 
+             { 'size': "30G", 'dev': 'vda', 'bus': 'virtio' }, // /var/snap
+        ],
+        cpu: { cores: 4, passthru:true},
+        memory: { capacity: GB(16) },
+    };
 }
 
 function node(name) {

@@ -19,3 +19,5 @@
         nebula_network_cidr: "{{ overlay['lh0'].netmask }}"
         nebula_clean_install: true
         nebula_internal_ip_addr: "{{ overlay[inventory_hostname].ip }}"
+        avoid_endpoints: ["{{ overlay['avoid-gw0'].ip }}:55554", "{{ overlay['avoid-gw1'].ip }}:55554", "{{ overlay['avoid-gw2'].ip }}:55554"]
+        install_user: rvn

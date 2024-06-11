@@ -18,9 +18,10 @@
 
     - debug: var=ifaces
 
+    # everything except gw0 which isnt in the overlay
     - name: set hostnames
       set_fact:
-        hostnames: "{{ overlay | list }}"
+        hostnames: "{{ overlay | list | difference(['avoid-gw0']) }}"
 
     - debug: var=hostnames
 
